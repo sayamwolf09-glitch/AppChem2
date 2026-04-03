@@ -298,6 +298,7 @@
   // Sample Data / Dữ liệu mẫu
   // =========================================================
   const DEMO = {
+    dataVersion: 2,
     users:[
       {id:'u-admin', username:'NguyenHang', password:'2109@Hangyp', role:'admin', fullName:'Cô Hằng - Admin'},
       {id:'u-teacher', username:'BacNinh', password:'BacNinh@9899', role:'teacher', fullName:'Giáo viên Bắc Ninh'},
@@ -409,23 +410,75 @@
   // Local Storage Helpers
   // =========================================================
   const STORAGE_KEY = 'chemplay-classroom-v2';
-  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
-  function loadDB(){
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO));
-      return clone(DEMO);
-    }
-    try{
-      const data = JSON.parse(raw);
-      return data;
-    }catch(e){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO));
-      return clone(DEMO);
-    }
-  }
-  function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
 
+function mergeById(oldList = [], newList = []){
+  const map = new Map();
+
+  oldList.forEach(item => {
+    if(item && item.id) map.set(item.id, item);
+  });
+
+  newList.forEach(item => {
+    if(!item || !item.id) return;
+
+    // Nếu muốn dữ liệu mới trong mã nguồn ghi đè dữ liệu cũ theo id
+    map.set(item.id, {
+      ...(map.get(item.id) || {}),
+      ...item
+    });
+  });
+
+  return Array.from(map.values());
+}
+
+function migrateData(oldData, demoData){
+  const migrated = {...oldData};
+
+  migrated.dataVersion = demoData.dataVersion || 1;
+
+  migrated.users = mergeById(oldData.users, demoData.users);
+  migrated.classes = mergeById(oldData.classes, demoData.classes);
+  migrated.students = mergeById(oldData.students, demoData.students);
+  migrated.questionBank = mergeById(oldData.questionBank, demoData.questionBank);
+
+  // Giữ nguyên dữ liệu phát sinh thực tế
+  migrated.attempts = oldData.attempts || [];
+
+  // Merge settings để không mất thiết lập cũ
+  migrated.settings = {
+    ...(demoData.settings || {}),
+    ...(oldData.settings || {})
+  };
+
+  return migrated;
+}
+
+function loadDB(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+
+  if(!raw){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO));
+    return clone(DEMO);
+  }
+
+  try{
+    const data = JSON.parse(raw);
+
+    if((data.dataVersion || 0) < (DEMO.dataVersion || 1)){
+      const migrated = migrateData(data, DEMO);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
+
+    return data;
+  }catch(e){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO));
+    return clone(DEMO);
+  }
+}
+
+function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
   // =========================================================
   // App State
   // =========================================================
