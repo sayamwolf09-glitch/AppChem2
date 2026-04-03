@@ -272,7 +272,7 @@
         <div class="tiny" style="color:#d8eeff;margin-top:8px">Có thể bật/tắt và điều chỉnh âm lượng, trạng thái được lưu lại.</div>
       </div>
 
-      <div class="footer-note">Bản 6.2 • Giao diện tối ưu cho giáo viên • Nhạc nền MP3 đính kèm • 1 file HTML</div>
+      <div class="footer-note">ZChem • Học Hóa cực chill • Điểm số cực phiêu • Ngại gì không thử?</div>
     </aside>
 
     <main class="main">
@@ -298,7 +298,7 @@
   // Sample Data / Dữ liệu mẫu
   // =========================================================
   const DEMO = {
-    dataVersion: 2,
+    dataVersion: 3,
     users:[
       {id:'u-admin', username:'NguyenHang', password:'2109@Hangyp', role:'admin', fullName:'Cô Hằng - Admin'},
       {id:'u-teacher', username:'BacNinh', password:'BacNinh@9899', role:'teacher', fullName:'Giáo viên Bắc Ninh'},
@@ -409,7 +409,7 @@
   // =========================================================
   // Local Storage Helpers
   // =========================================================
-  const STORAGE_KEY = 'chemplay-classroom-v2';
+  const STORAGE_KEY = 'zchem-classroom-v3';
 function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
 
 function mergeById(oldList = [], newList = []){
@@ -690,7 +690,7 @@ function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
       <div class="topbar">
         <div class="page-title">
           <h2>ZChem Classroom - Học Hóa cùng cô Hằng</h2>
-          <p>Học hóa cực chill - Không lo mất gốc.</p>
+          <p>Master Hóa theo cách của bạn.</p>
         </div>
         <div class="toolbar">
           <button class="btn" onclick="showScreen('freePlayScreen')">🎮 Sân chơi tự do</button>
