@@ -182,10 +182,38 @@
     }
     .hidden{display:none!important}
     .top-leaders{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .leader{padding:20px;border-radius:22px;background:linear-gradient(180deg,#ffffff,#eff8ff);text-align:center}
-    .leader .rank{font-size:12px;color:var(--muted);font-weight:800}
-    .leader .name{font-size:20px;font-weight:800;margin-top:8px}
-    .leader .score{font-size:30px;font-weight:800;color:var(--primary);margin-top:8px}
+.leader{padding:20px;border-radius:22px;background:linear-gradient(180deg,#ffffff,#eff8ff);text-align:center;position:relative}
+.leader .rank{font-size:12px;color:var(--muted);font-weight:800}
+.leader .name{font-size:20px;font-weight:800;margin-top:8px}
+.leader .score{font-size:30px;font-weight:800;color:var(--primary);margin-top:8px}
+
+.master-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 12px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#ffd54f,#ffb300);
+  color:#5c3b00;
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:10px;
+  box-shadow:0 8px 18px rgba(255,193,7,.28);
+}
+
+.crown-icon{
+  position:absolute;
+  top:10px;
+  right:14px;
+  font-size:24px;
+  line-height:1;
+}
+
+.crown-inline{
+  margin-right:6px;
+  font-size:18px;
+  vertical-align:middle;
+}
     .audio-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .range{accent-color:var(--primary)}
     .footer-note{margin-top:auto;font-size:13px;text-align:center;color:#d7eeff}
@@ -298,7 +326,7 @@
   // Sample Data / Dữ liệu mẫu
   // =========================================================
   const DEMO = {
-    dataVersion: 3,
+    dataVersion: 4,
     users:[
       {id:'u-admin', username:'NguyenHang', password:'2109@Hangyp', role:'admin', fullName:'Cô Hằng - Admin'},
       {id:'u-teacher', username:'BacNinh', password:'BacNinh@9899', role:'teacher', fullName:'Giáo viên Bắc Ninh'},
@@ -409,7 +437,7 @@
   // =========================================================
   // Local Storage Helpers
   // =========================================================
-  const STORAGE_KEY = 'zchem-classroom-v3';
+  const STORAGE_KEY = 'zchem-classroom-v4';
 function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
 
 function mergeById(oldList = [], newList = []){
@@ -1531,15 +1559,17 @@ function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
       </div>
 
       <div class="top-leaders">
-        ${top3.map((a,idx)=>`
-          <div class="card leader">
-            <div class="rank">Hạng ${idx+1}</div>
-            <div class="name">${esc(a.studentName)}</div>
-            <div class="muted">${esc(cls(a.classId)?.name || '')} • Khối ${esc(a.grade)}</div>
-            <div class="score">${a.score}/${a.total}</div>
-          </div>
-        `).join('') || `<div class="card center">Chưa có dữ liệu</div>`}
-      </div>
+  ${top3.map((a,idx)=>`
+    <div class="card leader">
+      ${idx===0 ? `<div class="crown-icon">👑</div>` : ``}
+      <div class="rank">Hạng ${idx+1}</div>
+      ${idx===0 ? `<div class="master-badge">👑 Master</div>` : ``}
+      <div class="name">${idx===0 ? `<span class="crown-inline">👑</span>` : ``}${esc(a.studentName)}</div>
+      <div class="muted">${esc(cls(a.classId)?.name || '')} • Khối ${esc(a.grade)}</div>
+      <div class="score">${a.score}/${a.total}</div>
+    </div>
+  `).join('') || `<div class="card center">Chưa có dữ liệu</div>`}
+</div>
 
       <div class="card">
         <div class="section-title">
@@ -1550,18 +1580,18 @@ function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
             <thead><tr><th>Hạng</th><th>Tên</th><th>Lớp</th><th>Khối</th><th>Chế độ</th><th>Điểm</th><th>Thời gian</th><th>Số lần chơi tự do</th></tr></thead>
             <tbody>
               ${rows.map((a,idx)=>{
-                const freeCount = db.attempts.filter(x=>x.mode==='free' && x.studentName.toLowerCase()===a.studentName.toLowerCase() && x.classId===a.classId).length;
-                return `<tr>
-                  <td>${idx+1}</td>
-                  <td>${esc(a.studentName)}</td>
-                  <td>${esc(cls(a.classId)?.name || '')}</td>
-                  <td>${esc(a.grade)}</td>
-                  <td>${a.mode==='free' ? '<span class="chip blue">Tự do</span>' : '<span class="chip green">Vào thi</span>'}</td>
-                  <td><strong>${a.score}/${a.total}</strong></td>
-                  <td>${elapsedText(a.durationSec*1000)}</td>
-                  <td>${a.mode==='free' ? freeCount : '-'}</td>
-                </tr>`;
-              }).join('') || `<tr><td colspan="8" class="center muted">Chưa có dữ liệu phù hợp bộ lọc.</td></tr>`}
+  const freeCount = db.attempts.filter(x=>x.mode==='free' && x.studentName.toLowerCase()===a.studentName.toLowerCase() && x.classId===a.classId).length;
+  return `<tr>
+    <td>${idx===0 ? '👑 ' : ''}${idx+1}</td>
+    <td>${idx===0 ? '👑 ' : ''}${esc(a.studentName)} ${idx===0 ? '<span class="chip yellow">Master</span>' : ''}</td>
+    <td>${esc(cls(a.classId)?.name || '')}</td>
+    <td>${esc(a.grade)}</td>
+    <td>${a.mode==='free' ? '<span class="chip blue">Tự do</span>' : '<span class="chip green">Vào thi</span>'}</td>
+    <td><strong>${a.score}/${a.total}</strong></td>
+    <td>${elapsedText(a.durationSec*1000)}</td>
+    <td>${a.mode==='free' ? freeCount : '-'}</td>
+  </tr>`;
+}).join('') || `<tr><td colspan="8" class="center muted">Chưa có dữ liệu phù hợp bộ lọc.</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -1890,18 +1920,19 @@ function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
           <div class="hr"></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Học sinh</th><th>Lớp</th><th>Đã làm?</th><th>Tiến bộ</th></tr></thead>
+              <thead><tr><th>Học sinh</th><th>Lớp</th><th>Đã làm?</th><th>Tiến bộ</th><th>Xóa</th></tr></thead>
               <tbody>
                 ${db.students.map(s=>{
-                  const atts = db.attempts.filter(a=>a.classId===s.classId && a.studentName.toLowerCase()===s.name.toLowerCase());
-                  const prog = computeStudentProgress(s);
-                  return `<tr>
-                    <td>${esc(s.name)}</td>
-                    <td>${esc(cls(s.classId)?.name || '')}</td>
-                    <td>${atts.length ? '<span class="chip green">Đã làm</span>' : '<span class="chip red">Chưa làm</span>'}</td>
-                    <td>${atts.length ? `${prog.best}% • ${prog.trend}` : '<span class="muted tiny">Chưa có</span>'}</td>
-                  </tr>`;
-                }).join('')}
+  const atts = db.attempts.filter(a=>a.classId===s.classId && a.studentName.toLowerCase()===s.name.toLowerCase());
+  const prog = computeStudentProgress(s);
+  return `<tr>
+    <td>${esc(s.name)}</td>
+    <td>${esc(cls(s.classId)?.name || '')}</td>
+    <td>${atts.length ? '<span class="chip green">Đã làm</span>' : '<span class="chip red">Chưa làm</span>'}</td>
+    <td>${atts.length ? `${prog.best}% • ${prog.trend}` : '<span class="muted tiny">Chưa có</span>'}</td>
+    <td><button class="btn danger" style="padding:8px 12px" onclick="deleteStudent('${s.id}')">Xóa</button></td>
+  </tr>`;
+}).join('')}
               </tbody>
             </table>
           </div>
@@ -2079,14 +2110,36 @@ function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
       </div>
     `);
   }
-  function addStudent(e){
-    e.preventDefault();
-    const name = $('studentNameField').value.trim();
-    const classId = $('studentClassField').value;
-    if(!name){ showToast('Vui lòng nhập tên học sinh.', 'error'); return; }
-    db.students.push({id:uid('stu_'), name, classId, grade:cls(classId)?.grade || ''});
-    saveDB(); showToast('Đã thêm học sinh.', 'success'); renderAll();
+  function deleteStudent(studentId){
+  const student = db.students.find(s => s.id === studentId);
+
+  if(!student){
+    showToast('Không tìm thấy học sinh cần xóa.', 'error');
+    return;
   }
+
+  const confirmed = confirm(
+    `Bạn có chắc muốn xóa học sinh "${student.name}" khỏi danh sách lớp và xóa toàn bộ kết quả ở chế độ Sân chơi tự do của học sinh này không?`
+  );
+  if(!confirmed) return;
+
+  // Xóa toàn bộ kết quả của học sinh này trong chế độ Sân chơi tự do
+  db.attempts = db.attempts.filter(a =>
+    !(
+      a.mode === 'free' &&
+      a.classId === student.classId &&
+      a.studentName.toLowerCase() === student.name.toLowerCase()
+    )
+  );
+
+  // Xóa học sinh khỏi danh sách
+  db.students = db.students.filter(s => s.id !== studentId);
+
+  saveDB();
+  showToast(`Đã xóa học sinh ${student.name} và toàn bộ kết quả ở chế độ Sân chơi tự do.`, 'warn');
+  renderAll();
+  showScreen('adminScreen');
+}
   function toggleExamOneTime(){
     db.settings.examOneTime = !db.settings.examOneTime;
     saveDB();
